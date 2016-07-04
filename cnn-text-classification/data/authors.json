@@ -1,0 +1,69 @@
+
+  [
+    {
+        "name": "Arthur",
+        "surname": "Conan Doyle",
+        "file_name": "arthur_conan_doyle.txt",
+        "index": 0
+    },{
+        "name": "Charles",
+        "surname": "Darwin",
+        "file_name": "charles_darwin.txt",
+        "index": 1
+    },{
+        "name": "Charles",
+        "surname": "Dickens",
+        "file_name": "charles_dickens.txt",
+        "index": 2
+    },{
+        "name": "Daniel",
+        "surname": "Defoe",
+        "file_name": "daniel_defoe.txt",
+        "index": 3
+    },{
+        "name": "Howard Phillips",
+        "surname": "Lovecraft",
+        "file_name": "howard_phillips_lovecraft.txt",
+        "index": 4
+    },{
+        "name": "James",
+        "surname": "Joyce",
+        "file_name": "james_joyce.txt",
+        "index": 5
+    },{
+        "name": "Jane",
+        "surname": "Austen",
+        "file_name": "jane_austen.txt",
+        "index": 6
+    },{
+        "name": "Jonathan",
+        "surname": "Swift",
+        "file_name": "jonathan_swift.txt",
+        "index": 7
+    },{
+        "name": "Mark",
+        "surname": "Twain",
+        "file_name": "mark_twain.txt",
+        "index": 8
+    },{
+        "name": "Mary",
+        "surname": "Shelley",
+        "file_name": "mary_shelley.txt",
+        "index": 9
+    },{
+        "name": "Oscar",
+        "surname": "Wilde",
+        "file_name": "oscar_wilde.txt",
+        "index": 10
+    },{
+        "name": "Robert Louis",
+        "surname": "Stevenson",
+        "file_name": "robert_louis_stevenson.txt",
+        "index": 11
+    },{
+        "name": "Virginia",
+        "surname": "Woolf",
+        "file_name": "virginia_woolf.txt",
+        "index": 12
+    }
+  ]
