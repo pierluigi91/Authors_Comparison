@@ -11,7 +11,7 @@ from naiveBayesClassifier.trainer import Trainer
 from naiveBayesClassifier.classifier import Classifier
 from operator import itemgetter
 import json
-sys.path.append('../pre_processing')
+sys.path.append('../../pre_processing')
 import clean_text
 import numpy as np
 
@@ -22,10 +22,10 @@ authorsTrainer = Trainer(tokenizer)
 js = None
 autori= []
 length_opere=[]
-with open('../data/authors.json') as data_file:
+with open('../../data/authors.json') as data_file:
     js = json.load(data_file)
 for d in js:
-    opera = open('../data/input_backup/'+d['file_name'], "r").readlines()  #CAMBIARE QUI PER LE OPERE
+    opera = open('../../data/input_stemmed/'+d['file_name'], "r").readlines()  #CAMBIARE QUI PER LE OPERE
     length_opere.append(len(opera))
     r = ""
     for p in opera:
@@ -93,7 +93,7 @@ for p in classification:
     for d in js:
         if d['file_name']==p[0]+".txt":
             curr = d['file_name']
-            lung=len(open("../data/input_backup/"+curr).readlines())
+            lung=len(open("../../data/input_stemmed/"+curr).readlines())
     val = ((p[1])/sum)*100
     prova.append(val)
     #100 oppure ALOT

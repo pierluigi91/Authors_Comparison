@@ -56,7 +56,7 @@ def load_data_and_labels():
                 temp_label.append(0)
             i += 1
         # temp_label[d['index']] = 1
-        temp_examples = list(open('./data/input/' + d['file_name']).readlines())
+        temp_examples = list(open('./data/small_input/' + d['file_name']).readlines())
         temp_examples = [s.strip() for s in temp_examples]
         for _ in temp_examples:
             list_labels.append(temp_label)
@@ -123,7 +123,7 @@ def build_input_data(sentences, labels, vocabulary):
 def load_data():
     """
     Loads and preprocessed data for the MR dataset.
-    Returns input vectors, labels, vocabulary, and inverse vocabulary.
+    Returns small_input vectors, labels, vocabulary, and inverse vocabulary.
     """
     # Load and preprocess data
     print('Load data and lables')
@@ -132,7 +132,7 @@ def load_data():
     sentences_padded = pad_sentences(sentences)
     print('Build vocabularies')
     vocabulary, vocabulary_inv = build_vocab(sentences_padded)
-    print('Build input data')
+    print('Build small_input data')
     x, y = build_input_data(sentences_padded, labels, vocabulary)
     return [x, y, vocabulary, vocabulary_inv]
 

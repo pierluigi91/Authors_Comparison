@@ -1,7 +1,7 @@
 from pyspark import SparkConf, SparkContext
-import re
-import json
-from operator import add
+from nltk.tag import pos_tag
+from nltk import word_tokenize
+
 
 def map_red_less_used(path, num):
     conf = (SparkConf().setMaster('local').setAppName('mapred'))
@@ -43,4 +43,20 @@ def average_sentences_length(path):
     mapred_01 = text.map(lambda line: len(line.split()))
     print mapred_01.mean()
 
-average_sentences_length("../../data/input_backup/arthur_conan_doyle.txt")
+def pos_tagging(path): # DA FARE SUL TESTO PRE-STEMMING
+    conf = (SparkConf().setMaster('local').setAppName('mapred'))
+    sc = SparkContext(conf=conf)
+    text = sc.textFile(path,128)
+    num_sentences = text.count()
+    mapred_01 = text.map(lambda line: pos_tag(word_tokenize(line))).reduce(lambda x,y:x+y)
+    mapred_02 = sc.parallelize(mapred_01).map(lambda (a,b):(b,a)).reduceByKey(lambda x, y: (str(x)+" "+str(y)))
+    #mapred_02.saveAsTextFile("TAGGED")
+    mapred_03 = mapred_02.map(lambda (a,b): (a, len(list(b.split()))))
+    #mapred_03.saveAsTextFile("COUNT")
+    num_conj = mapred_03.collectAsMap().get('IN')
+    print num_conj/float(num_sentences)
+
+pos_tagging("../../data/input_stemmed/arthur_conan_doyle.txt")
+#pos_tagging("/home/pierluigi/Scaricati/sub_conj.txt")
+
+
