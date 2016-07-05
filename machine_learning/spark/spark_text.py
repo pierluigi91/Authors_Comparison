@@ -3,6 +3,8 @@ import re
 import numpy as np
 import json
 from operator import add
+from nltk.tag import pos_tag
+from nltk import word_tokenize
 
 
 def map_red_less_used(path, num):
@@ -24,7 +26,13 @@ def hapax_dix_legomena(sc, path):
         .reduceByKey(lambda a, b: a + b)
     unique_words = len(mapred_01.countByKey())
     mapred_02 = dict(mapred_01.map(lambda (a, b): (b, a)).countByKey().items())
-    return float(mapred_02[1])/float(unique_words), float(mapred_02[2])/float(unique_words)
+    hapax = 0
+    if mapred_02.get(1) is not None:
+        hapax = float(mapred_02[1])/float(unique_words)
+    dix = 0
+    if mapred_02.get(2) is not None:
+        dix = float(mapred_02[2])/float(unique_words)
+    return hapax, dix
 
 
 def average_words_length(sc, path):
@@ -41,15 +49,82 @@ def average_sentences_length(sc, path):
     return mapred_01.mean()
 
 
+def conj_count(sc, path):
+    text = sc.textFile(path, 128)
+    num_sentences = text.count()
+    mapred_01 = text.map(lambda line: pos_tag(word_tokenize(line))).reduce(lambda x,y:x+y)
+    mapred_02 = sc.parallelize(mapred_01).map(lambda (a,b):(b,a)).reduceByKey(lambda x, y: (str(x)+" "+str(y)))
+    #mapred_02.saveAsTextFile("TAGGED")
+    mapred_03 = mapred_02.map(lambda (a,b): (a, len(list(b.split()))))
+    #mapred_03.saveAsTextFile("COUNT")
+    num_conj = mapred_03.collectAsMap().get('IN')
+    return num_conj/float(num_sentences)
+
+
+def is_conj(word):
+    conjs = ["after","how","till","'til","although","if","unless","as","inasmuch","until","when","lest","whenever","where","wherever","since","while","because","before","than","that","though"]
+    if word in conjs:
+        return True
+    else:
+        return False
+
+def conj_count2(sc, path):
+    text = sc.textFile(path)
+    num_sentences = text.count()
+    num_conj = text.flatMap(lambda line: re.sub(r"[^A-Za-z\s]", "", line).split(" "))\
+        .map(lambda a: ("IN", 1) if is_conj(a) else ("Null", 1)).reduceByKey(lambda a, b: a+b).collectAsMap().get("IN")
+    return num_conj/float(num_sentences)
+
+
 def get_spark_vector(path):
-    conf = (SparkConf().setMaster('local').setAppName('mapred'))
+    conf = (SparkConf().setMaster('local[*]').setAppName('spark'))
     sc = SparkContext(conf=conf)
     vector = list()
-    vector.append(hapax_dix_legomena(sc, path)[0])
-    vector.append(hapax_dix_legomena(sc, path)[1])
+    print " "
+    print " "
+    print " "
+    print " "
+    print "----------------------- HAPAX DIX ------------------------"
+    print " "
+    print " "
+    print " "
+    print " "
+
+    hapax_dix_result = hapax_dix_legomena(sc, path)
+    vector.append(hapax_dix_result[0])
+    vector.append(hapax_dix_result[1])
+    print " "
+    print " "
+    print " "
+    print " "
+    print "----------------------- WORDS ------------------------"
+    print " "
+    print " "
+    print " "
+    print " "
     vector.append(average_words_length(sc, path))
+    print " "
+    print " "
+    print " "
+    print " "
+    print "----------------------- SENTENCES ------------------------"
+    print " "
+    print " "
+    print " "
+    print " "
     vector.append(average_sentences_length(sc, path))
+    print " "
+    print " "
+    print " "
+    print " "
+    print "----------------------- CONJ ------------------------"
+    print " "
+    print " "
+    print " "
+    print " "
+    vector.append(conj_count2(sc, path))
     print vector
     return np.array(vector)
+
 
 get_spark_vector("/Users/Max/Desktop/prova.txt")
