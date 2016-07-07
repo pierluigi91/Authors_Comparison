@@ -1,7 +1,9 @@
 #! /usr/bin/env python
 
-import json
 import sys
+sys.path.append('pre_processing')
+import clean_text as clean_text
+import json
 from operator import itemgetter
 
 import numpy as np
@@ -9,10 +11,15 @@ import tensorflow as tf
 
 import data_helpers
 from text_cnn import TextCNN
+#sys.path.append('/home/pierluigi/PycharmProjects/Authors_Comparison')
+sys.path.append('')
+import main
 
-sys.path.append('../pre_processing')
-
-import clean_text
+<<<<<<< Updated upstream
+=======
+sys.path.append('pre_processing')
+from AuthorsCom import clean_text
+>>>>>>> Stashed changes
 
 precision = []
 recall = []
@@ -24,10 +31,10 @@ num_authors = 13
 js = None
 autori= None
 length_opere=[]
-with open('./data/authors.json') as data_file:
+with open('data/authors.json') as data_file:
     js = json.load(data_file)
 for d in js:
-    opera = open('../data/input_stemmed/'+d['file_name'], "r").readlines()  #CAMBIARE QUI PER LE OPERE
+    opera = open('data/input_stemmed/'+d['file_name'], "r").readlines()  #CAMBIARE QUI PER LE OPERE
     length_opere.append(len(opera))
 max_length = max(length_opere)
 
@@ -84,7 +91,7 @@ def print_results(array):
     sum=0.0
 
     for idx, val in enumerate(array):
-        temp_len = len(open('../data/input_stemmed/'+d['file_name'], "r").readlines())
+        temp_len = len(open('data/input_stemmed/'+d['file_name'], "r").readlines())
         norm = (val * max_length) / temp_len
         results_list.append([data[idx]['name'], data[idx]['surname'], norm])
         if val>0.0:
@@ -193,7 +200,7 @@ def pred(entrada, label, seq_len, multiple_lines=False):
             sess.run(tf.initialize_all_variables())
             #saver.restore(sess, "/home/pierluigi/PycharmProjects/Authors_Comparison/deep_learning/runs/1464774069/checkpoints/model-5400")
             #saver.restore(sess, "/home/pierluigi/PycharmProjects/Authors_Comparison/deep_learning/runs/1464950406/checkpoints/model-3900")
-            saver.restore(sess, "runs/1464964595/checkpoints/model-3900")
+            saver.restore(sess, "deep_learning/runs/1464950406/checkpoints/model-3900")
 
 
             def predict_step(x_batch):
@@ -252,9 +259,15 @@ def pred(entrada, label, seq_len, multiple_lines=False):
             #print (y[1][0])    file_fenno_2('data/rt-polaritydata/rt-polarity.test')
             #return(y[1][0] / y[1][0].max(axis=0))
             #return y[1][0]
+from threading import Thread
+def start():
+    path = raw_input("Inserire un path di un file da classificare: ")
+    Thread(target=file_fenno_2(path))
+    Thread(target=main.evaluate_try(path))
 
 def _start_shell(local_ns=None):
   # An interactive shell is useful for debugging/development.
+  from threading import Thread
   import IPython
   user_ns = {}
   if local_ns:
@@ -262,6 +275,7 @@ def _start_shell(local_ns=None):
   user_ns.update(globals())
   IPython.start_ipython(argv=[], user_ns=user_ns)
 
-#file_fenno_2("/home/pierluigi/Scrivania/testi/prove/hp_01.txt")
 
 _start_shell(locals())
+
+

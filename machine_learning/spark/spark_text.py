@@ -1,11 +1,12 @@
 from pyspark import SparkConf, SparkContext
 import re
-import numpy as np
+from scipy import spatial
 import json
+import numpy as np
 from operator import add
 from nltk.tag import pos_tag
 from nltk import word_tokenize
-import time
+
 
 def map_red_less_used(path, num):
     conf = (SparkConf().setMaster('local').setAppName('mapred'))
@@ -39,6 +40,7 @@ def average_words_length(sc, path):
     text = sc.textFile(path)
     mapred_01 = text.flatMap(lambda line: re.sub(r"[^A-Za-z\s]", "", line).split(" ")).map(lambda a: (a.encode("utf-8"), (len(a))))
     tot = mapred_01.values().sum()
+
     average_length = tot/float(mapred_01.count())
     return average_length
 
@@ -81,8 +83,6 @@ def pos_tagging(path, split_size, sc): # DA FARE SUL TESTO PRE-STEMMING
     text = sc.textFile(path, split_size)
     mapred = text.flatMap(lambda line: pos_tag(line.split())).filter(lambda line: 'IN' in line)
     return float(mapred.count())/float(text.count())
-
-
 
 def get_spark_vector(path):
     conf = (SparkConf().setMaster('local[*]').setAppName('spark'))
@@ -129,21 +129,40 @@ def get_spark_vector(path):
     print " "
     print " "
     print " "
-    #vector.append(conj_count2(sc, path))
-    vector.append(pos_tagging(path, 4, sc))
+    vector.append(conj_count2(sc, path))
     print vector
-    return np.array(vector)
-
-
-get_spark_vector("/Users/Max/Desktop/prova.txt")
+    sc.stop()
+    return vector
 
 
 def train_vectors():
-    with open('data/authors.json') as data_file:
+    with open('../../data/authors.json') as data_file:
         js = json.load(data_file)
     vectors_json = {}
     for d in js:
-        vectors_json[str(d['file_name']).split(".", 1)[0]] = get_spark_vector('data/input_stemmed/' + d['file_name'])
+        vectors_json[str(d['file_name'])] = get_spark_vector('../../data/sentence_to_line_data/' + d['file_name'])
 
-    with open('authors_vector.json') as vectors:
+    with open('authors_vector.json', 'w') as vectors:
         json.dump(vectors_json, vectors)
+
+
+def evaluate(path):
+    input_vector = np.array(get_spark_vector(path))
+    with open('../../data/authors.json') as authors_json:
+        authors = json.load(authors_json)
+    with open('authors_vector.json') as vectors_json:
+        vectors = json.load(vectors_json)
+    distance = 100
+    distance_vector = []
+    for author in vectors:
+
+        temp_dist = spatial.distance.jaccard(input_vector, np.array(vectors[author]))
+        if temp_dist < distance:
+            distance = temp_dist
+            for aut in authors:
+                if aut['filename'] == author:
+                    distance_vector[aut['index']] = temp_dist
+    return distance_vector
+
+
+train_vectors()
