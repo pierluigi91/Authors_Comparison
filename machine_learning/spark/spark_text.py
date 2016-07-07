@@ -25,6 +25,7 @@ def map_red_count_x_occ(path, x):
 
     print mapred_02[x]
 
+
 def average_words_length(path):
     conf = (SparkConf().setMaster('local').setAppName('mapred'))
     sc = SparkContext(conf=conf)
@@ -32,8 +33,6 @@ def average_words_length(path):
     mapred_01 = text.flatMap(lambda line: line.split(" ")).map(lambda a: (a.encode("utf-8"), (len(a))))
     tot = mapred_01.values().sum()
     print tot/float(mapred_01.count())
-
-    mapred_01.saveAsTextFile("DIOBELLO")
 
 
 def average_sentences_length(path):
@@ -68,13 +67,13 @@ def pos_tagging(path, split_size, sc): # DA FARE SUL TESTO PRE-STEMMING
     print 'SPLIT: ' + str(split_size)
     print 'TEMPO: ' + str(time.time()-ts)
 
-splits = [1, 2, 4, 8, 16, 32, 64, 128]
+# splits = [1, 2, 4, 8, 16, 32, 64, 128]
+#
+# conf = (SparkConf().setMaster('local[*]').setAppName('mapred'))
+# sc = SparkContext(conf=conf)
 
-conf = (SparkConf().setMaster('local[*]').setAppName('mapred'))
-sc = SparkContext(conf=conf)
-
-for s in splits:
-    pos_tagging("../../data/input_stemmed/arthur_conan_doyle.txt", s, sc)
+# for s in splits:
+#     pos_tagging("../../data/input_stemmed/arthur_conan_doyle.txt", s, sc)
 #pos_tagging("/home/pierluigi/Scaricati/sub_conj.txt")
 
 
