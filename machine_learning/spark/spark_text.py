@@ -2,10 +2,9 @@ from pyspark import SparkConf, SparkContext
 import re
 import numpy as np
 import json
-from operator import add
 from nltk.tag import pos_tag
 from nltk import word_tokenize
-import time
+
 
 def map_red_less_used(path, num):
     conf = (SparkConf().setMaster('local').setAppName('mapred'))
@@ -128,10 +127,8 @@ def get_spark_vector(path):
     print " "
     print " "
     print " "
-    #vector.append(conj_count2(sc, path))
-    vector.append(pos_tagging(path, 4, sc))
+    vector.append(conj_count2(sc, path))
     print vector
     return np.array(vector)
 
 
-get_spark_vector("/Users/Max/Desktop/prova.txt")
