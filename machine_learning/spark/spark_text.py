@@ -109,7 +109,7 @@ def get_spark_vector(path):
     print " "
     print " "
     print " "
-    vector.append(average_words_length(sc, path))
+    #vector.append(average_words_length(sc, path))
     print " "
     print " "
     print " "
@@ -162,7 +162,5 @@ def evaluate(path):
             for aut in authors:
                 if aut['filename'] == author:
                     distance_vector[aut['index']] = temp_dist
+    print distance_vector
     return distance_vector
-
-
-train_vectors()

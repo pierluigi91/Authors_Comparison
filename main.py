@@ -6,16 +6,15 @@ from machine_learning.spark import spark_text as sp #suddividere in metodi di tr
 
 
 def train():
-    #Thread(target=sp.train_vector())
+    #Thread(target=sp.train_vectors())
     Thread(target=nb_tr.train())
 
 
-
-def evaluate_try(path):  # params
-    Thread(target=sp.get_spark_vector(path))
+def evaluate(path):  # params
+    Thread(target=sp.evaluate(path))
     Thread(target=nb_ev.eval(path))
     #Thread(target=dp_eval.evaluate(path))
 
-#train()
+train()
 #evaluate()
 

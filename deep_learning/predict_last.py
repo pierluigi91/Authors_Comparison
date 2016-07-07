@@ -15,11 +15,6 @@ from text_cnn import TextCNN
 sys.path.append('')
 import main
 
-<<<<<<< Updated upstream
-=======
-sys.path.append('pre_processing')
-from AuthorsCom import clean_text
->>>>>>> Stashed changes
 
 precision = []
 recall = []
@@ -263,7 +258,7 @@ from threading import Thread
 def start():
     path = raw_input("Inserire un path di un file da classificare: ")
     Thread(target=file_fenno_2(path))
-    Thread(target=main.evaluate_try(path))
+    Thread(target=main.evaluate(path))
 
 def _start_shell(local_ns=None):
   # An interactive shell is useful for debugging/development.
@@ -277,5 +272,4 @@ def _start_shell(local_ns=None):
 
 
 _start_shell(locals())
-
 
