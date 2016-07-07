@@ -29,9 +29,9 @@ def clean_top_bottom(path):
     # os.path.basename(path)
     # cleaned_text = open(subdir+"/cleaned_text_"+os.path.basename(path).replace(".txt","")+".txt","w")
     cleaned_text = ''
-    for i in range(0, len(libro)):
-        if libro[i].__contains__("*** START OF") \
-                or libro[i].__contains__("***START OF"):
+    for i in range(1, len(libro)):
+        if libro[i-1].__contains__("*** START OF") \
+                or libro[i-1].__contains__("***START OF"):
             start = True
         if libro[i].__contains__("*** END OF THIS PROJECT GUTENBERG ") \
                 or libro[i].__contains__("*** END OF THE PROJECT GUTENBERG ") \
@@ -189,8 +189,9 @@ def process_dataset(rootdir):
             output_stemmed_file.close()
             print author.replace('_', ' ') + ', ' + _file + ' in ' + str(time.time() - ts) + ' secondi.'
 
-#process_dataset('../data/dataset')
+process_dataset('../data/dataset')
 merge_files_by_author('../data/sentence_to_line_data')
+merge_files_by_author('../data/stemmed_data')
 
 
 

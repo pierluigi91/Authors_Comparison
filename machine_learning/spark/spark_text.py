@@ -136,3 +136,14 @@ def get_spark_vector(path):
 
 
 get_spark_vector("/Users/Max/Desktop/prova.txt")
+
+
+def train_vectors():
+    with open('data/authors.json') as data_file:
+        js = json.load(data_file)
+    vectors_json = {}
+    for d in js:
+        vectors_json[str(d['file_name']).split(".", 1)[0]] = get_spark_vector('data/input_stemmed/' + d['file_name'])
+
+    with open('authors_vector.json') as vectors:
+        json.dump(vectors_json, vectors)
