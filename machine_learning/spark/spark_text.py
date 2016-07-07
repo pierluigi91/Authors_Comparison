@@ -160,5 +160,8 @@ def evaluate(path):
             if aut['file_name'] == author:
                 print "DISTANZA DA " + str(author) + " = " + str(temp_dist)
                 distance_vector.insert(aut['index'], temp_dist)
+
+    distance_vector = np.array(distance_vector)
+    distance_vector = distance_vector / distance_vector.max(axis=0)
     print distance_vector
     return distance_vector
