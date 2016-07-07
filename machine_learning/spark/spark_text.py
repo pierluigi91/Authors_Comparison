@@ -5,7 +5,7 @@ import json
 from operator import add
 from nltk.tag import pos_tag
 from nltk import word_tokenize
-
+import time
 
 def map_red_less_used(path, num):
     conf = (SparkConf().setMaster('local').setAppName('mapred'))
@@ -62,7 +62,8 @@ def conj_count(sc, path):
 
 
 def is_conj(word):
-    conjs = ["after","how","till","'til","although","if","unless","as","inasmuch","until","when","lest","whenever","where","wherever","since","while","because","before","than","that","though"]
+    conjs = ["after", "how", "till", "'til", "although", "if", "unless", "as", "inasmuch", "until", "when", "lest",
+             "whenever", "where", "wherever", "since", "while", "because", "before", "than", "that", "though"]
     if word in conjs:
         return True
     else:
@@ -74,6 +75,13 @@ def conj_count2(sc, path):
     num_conj = text.flatMap(lambda line: re.sub(r"[^A-Za-z\s]", "", line).split(" "))\
         .map(lambda a: ("IN", 1) if is_conj(a) else ("Null", 1)).reduceByKey(lambda a, b: a+b).collectAsMap().get("IN")
     return num_conj/float(num_sentences)
+
+
+def pos_tagging(path, split_size, sc): # DA FARE SUL TESTO PRE-STEMMING
+    text = sc.textFile(path, split_size)
+    mapred = text.flatMap(lambda line: pos_tag(line.split())).filter(lambda line: 'IN' in line)
+    return float(mapred.count())/float(text.count())
+
 
 
 def get_spark_vector(path):
@@ -89,7 +97,6 @@ def get_spark_vector(path):
     print " "
     print " "
     print " "
-
     hapax_dix_result = hapax_dix_legomena(sc, path)
     vector.append(hapax_dix_result[0])
     vector.append(hapax_dix_result[1])
@@ -122,7 +129,8 @@ def get_spark_vector(path):
     print " "
     print " "
     print " "
-    vector.append(conj_count2(sc, path))
+    #vector.append(conj_count2(sc, path))
+    vector.append(pos_tagging(path, 4, sc))
     print vector
     return np.array(vector)
 
