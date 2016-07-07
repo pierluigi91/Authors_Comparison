@@ -17,3 +17,5 @@ class Trainer(object):
         tokens = self.tokenizer.tokenize(text)
         for token in tokens:
             self.data.increaseToken(token, className)
+
+
