@@ -6,7 +6,6 @@ texts. So, you have better call this data your training set.
 """
 import pickle
 import sys
-sys.path.append("/usr/local/lib/python2.7/dist-packages/naiveBayesClassifier")
 from naiveBayesClassifier import tokenizer
 from naiveBayesClassifier.trainer import Trainer
 import json
@@ -21,7 +20,7 @@ def train():
     with open('data/authors.json') as data_file:
         js = json.load(data_file)
     for d in js:
-        opera = open('data/input_stemmed/'+d['file_name'], "r").readlines()  #CAMBIARE QUI PER LE OPERE
+        opera = open('data/stemmed_data/'+d['file_name'], "r").readlines()  #CAMBIARE QUI PER LE OPERE
         length_opere.append(len(opera))
         r = ""
         for p in opera:

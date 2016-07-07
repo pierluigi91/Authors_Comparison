@@ -6,7 +6,7 @@ from machine_learning.spark import spark_text as sp #suddividere in metodi di tr
 
 
 def train():
-    #Thread(target=sp.train_vectors())
+    Thread(target=sp.train_vectors())
     Thread(target=nb_tr.train())
 
 
@@ -15,6 +15,6 @@ def evaluate(path):  # params
     Thread(target=nb_ev.eval(path))
     #Thread(target=dp_eval.evaluate(path))
 
-train()
-#evaluate()
+#train()
+evaluate("/Users/Max/Desktop/testi/prove/oliver_twist.txt")
 

@@ -255,6 +255,8 @@ def pred(entrada, label, seq_len, multiple_lines=False):
             #return(y[1][0] / y[1][0].max(axis=0))
             #return y[1][0]
 from threading import Thread
+
+
 def start():
     path = raw_input("Inserire un path di un file da classificare: ")
     Thread(target=file_fenno_2(path))
