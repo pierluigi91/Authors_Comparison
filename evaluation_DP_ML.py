@@ -8,13 +8,12 @@ from operator import itemgetter
 
 import numpy as np
 import tensorflow as tf
-
-import data_helpers
-from text_cnn import TextCNN
-#sys.path.append('/home/pierluigi/PycharmProjects/Authors_Comparison')
+sys.path.append('deep_learning')
+from deep_learning import data_helpers
+from deep_learning.text_cnn import TextCNN
 sys.path.append('')
-import main
-
+from machine_learning.naive_bayes.eval import evaluation as nb_ev
+from machine_learning.spark import spark_text as sp
 
 precision = []
 recall = []
@@ -83,7 +82,7 @@ def print_results(array):
         data = json.load(data_file)
     array = array.tolist()
     results_list = []
-    sum=0.0
+    sum = 0.0
 
     for idx, val in enumerate(array):
         temp_len = len(open('data/input_stemmed/'+d['file_name'], "r").readlines())
@@ -102,49 +101,38 @@ def print_results(array):
         if result[2]>0.0:
             print("%-14s %-8s %20.4f" % (result[0], result[1], (result[2]/sum)*100.0)+" %")
     print('=============================================')
-    # print "PRECISION", sum(precision)/len(precision)
-    # print "RECALL", sum(recall)/len(recall)
-    # print "F1_MEASURE", (sum(precision)/len(precision) * sum(recall)/len(recall)) / (sum(precision)/len(precision) + sum(recall)/len(recall))
+
+# def sentence_fenno(sent, in_file=False):
+#     idx = 1
+#     entrada = x[idx]
+#     sentence = data_helpers.clean_str(sent).split()
+#     seq_len = max(5, len(sentence))
+#     for i in range(seq_len - len(sentence)):
+#         sentence.append('<PAD/>')
+#
+#     entrada = np.array([vocabulary[w] for w in sentence if w in vocabulary])
+#
+#     empty_check = False
+#     for w in sentence:
+#         if w in vocabulary:
+#             if w != padding_word:
+#                 empty_check = True
+#         else:
+#             seq_len -= 1
+#
+#     if not empty_check:
+#         print('Nessuna parola presente nel vocabolario')
+#         return
+#     label = y[idx]
+#     a = pred(entrada, label, seq_len)
+#     if not in_file:
+#         print_results(a)
+#         a = a / a.max(axis=0)
+#     else:
+#         return a
 
 
-
-
-def sentence_fenno(sent, in_file=False):
-    idx = 1
-    entrada = x[idx]
-    sentence = data_helpers.clean_str(sent).split()
-    seq_len = max(5, len(sentence))
-    for i in range(seq_len - len(sentence)):
-        sentence.append('<PAD/>')
-
-    entrada = np.array([vocabulary[w] for w in sentence if w in vocabulary])
-
-    empty_check = False
-    for w in sentence:
-        if w in vocabulary:
-            if w != padding_word:
-                empty_check = True
-        else:
-            seq_len -= 1
-
-    #empty_check = [i += 1 for w in sentence if w in vocabulary and w != '<PAD/>']
-    if not empty_check:
-        print('Nessuna parola presente nel vocabolario')
-        return
-    label = y[idx]
-    # print(entrada)
-    # print(' '.join([vocabulary_inv[i] for i in entrada]))
-    # print('sequence length', seq_len)
-    #pred(entrada, label, seq_len)
-    a = pred(entrada, label, seq_len)
-    if not in_file:
-        print_results(a)
-        a = a / a.max(axis=0)
-    else:
-        return a
-
-
-def file_fenno_2(path):
+def evaluation(path):
     idx = 1
     sentences = list(open(path, "r").readlines())
     sentences = [s.strip() for s in sentences]
@@ -193,8 +181,6 @@ def pred(entrada, label, seq_len, multiple_lines=False):
 
             # Initialize all variables
             sess.run(tf.initialize_all_variables())
-            #saver.restore(sess, "/home/pierluigi/PycharmProjects/Authors_Comparison/deep_learning/runs/1464774069/checkpoints/model-5400")
-            #saver.restore(sess, "/home/pierluigi/PycharmProjects/Authors_Comparison/deep_learning/runs/1464950406/checkpoints/model-3900")
             saver.restore(sess, "deep_learning/runs/1464950406/checkpoints/model-3900")
 
 
@@ -208,30 +194,6 @@ def pred(entrada, label, seq_len, multiple_lines=False):
                 }
                 y_pred = sess.run(
                     [cnn.predictions, cnn.scores], feed_dict)
-
-                # y_true = np.reshape(label, (-1, len(label)))
-                #
-                # approx=[]
-                # for p in y_pred[1][0]:
-                #     approx.append(p/np.amax(y_pred[1][0]))
-                #
-                # approx_ult=[]
-                # for p in approx:
-                #     if p!=1.0:
-                #         approx_ult.append(0.0)
-                #     else:
-                #         approx_ult.append(p)
-                #
-                # print y_true
-                # print approx_ult
-                #
-                # precision.append(sk.metrics.precision_score(y_true, approx_ult,average='binary'))
-                # recall.append(sk.metrics.recall_score(y_true, approx_ult,average='binary'))
-                #
-                # if (sk.metrics.precision_score(y_true, approx_ult,average='binary') ==1.0):
-                #     pos.append(1)
-                #f1_score.append(sk.metrics.f1_score(y_true, approx_ult,average='binary'))
-
                 return (y_pred)
 
             if not multiple_lines:
@@ -251,18 +213,15 @@ def pred(entrada, label, seq_len, multiple_lines=False):
                 return np.mean(all_values, axis=0)
 
 
-            #print (y[1][0])    file_fenno_2('data/rt-polaritydata/rt-polarity.test')
-            #return(y[1][0] / y[1][0].max(axis=0))
-            #return y[1][0]
 from threading import Thread
 def start():
     path = raw_input("Inserire un path di un file da classificare: ")
-    Thread(target=file_fenno_2(path))
-    Thread(target=main.evaluate_try(path))
+    Thread(target=evaluation(path))
+    Thread(target=sp.get_spark_vector(path))
+    Thread(target=nb_ev.eval(path))
+
 
 def _start_shell(local_ns=None):
-  # An interactive shell is useful for debugging/development.
-  from threading import Thread
   import IPython
   user_ns = {}
   if local_ns:

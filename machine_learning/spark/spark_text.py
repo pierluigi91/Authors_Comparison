@@ -1,10 +1,10 @@
 from pyspark import SparkConf, SparkContext
 import re
-import numpy as np
+from scipy import spatial
 import json
+import numpy as np
 from nltk.tag import pos_tag
 from nltk import word_tokenize
-
 
 def map_red_less_used(path, num):
     conf = (SparkConf().setMaster('local').setAppName('mapred'))
@@ -131,4 +131,34 @@ def get_spark_vector(path):
     print vector
     return np.array(vector)
 
+def train_vectors():
+    with open('data/authors.json') as data_file:
+        js = json.load(data_file)
+    vectors_json = {}
+    for d in js:
+        vectors_json[str(d['file_name'])] = get_spark_vector('data/sentence_to_line_data/' + d['file_name'])
+
+    with open('authors_vector.json', 'w') as vectors:
+        json.dump(vectors_json, vectors)
+
+
+def evaluate(path):
+    input_vector = np.array(get_spark_vector(path))
+    with open('data/authors.json') as authors_json:
+        authors = json.load(authors_json)
+    with open('authors_vector.json') as vectors_json:
+        vectors = json.load(vectors_json)
+    distance = 100
+    distance_vector = list()
+    for author in vectors:
+        temp_dist = spatial.distance.cosine(input_vector, np.array(vectors[author]))
+        for aut in authors:
+            if aut['file_name'] == author:
+                print "DISTANZA DA " + str(author) + " = " + str(temp_dist)
+                distance_vector.insert(aut['index'], temp_dist)
+
+    distance_vector = np.array(distance_vector)
+    distance_vector = distance_vector / distance_vector.max(axis=0)
+    print distance_vector
+    return distance_vector
 

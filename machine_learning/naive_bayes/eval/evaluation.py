@@ -28,7 +28,7 @@ def eval(path):
     for t in input:
         t = ct.stopping(t)
         t = ct.stemming(t)
-        res += t.replace(",","").replace(";","").replace(")","").replace("(","").replace(".","").replace(":","")
+        res += t.replace(",","").replace(";","").replace(")","").replace("(","").replace(".","").replace(":","").replace("!","").replace("?","")
 
 
 
@@ -42,7 +42,7 @@ def eval(path):
     sum = 0.0
     for p in classification:
         sum += p[1]
-    sum = max(min(sum,ALOT),-ALOT)
+    sum = max(min(sum, ALOT), -ALOT)
 
     prova=[]
     for p in classification:
@@ -54,4 +54,4 @@ def eval(path):
         val = ((p[1])/sum)*100
         prova.append(val)
         #100 oppure ALOT
-        print p[0],"===========>", val if val<np.inf else 100, "%"
+        print p[0],"===========>", val if val < np.inf else 100, "%"
