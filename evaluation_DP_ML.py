@@ -28,7 +28,7 @@ length_opere=[]
 with open('data/authors.json') as data_file:
     js = json.load(data_file)
 for d in js:
-    opera = open('data/input_stemmed/'+d['file_name'], "r").readlines()  #CAMBIARE QUI PER LE OPERE
+    opera = open('data/stemmed_data/'+d['file_name'], "r").readlines()  #CAMBIARE QUI PER LE OPERE
     length_opere.append(len(opera))
 max_length = max(length_opere)
 
@@ -85,7 +85,7 @@ def print_results(array):
     sum = 0.0
 
     for idx, val in enumerate(array):
-        temp_len = len(open('data/input_stemmed/'+d['file_name'], "r").readlines())
+        temp_len = len(open('data/stemmed_data/'+d['file_name'], "r").readlines())
         norm = (val * max_length) / temp_len
         results_list.append([data[idx]['name'], data[idx]['surname'], norm])
         if val>0.0:
@@ -181,7 +181,7 @@ def pred(entrada, label, seq_len, multiple_lines=False):
 
             # Initialize all variables
             sess.run(tf.initialize_all_variables())
-            saver.restore(sess, "deep_learning/runs/1464950406/checkpoints/model-3900")
+            saver.restore(sess, "runs/1467984419/checkpoints/model-100")
 
 
             def predict_step(x_batch):

@@ -107,7 +107,7 @@ def get_spark_vector(path):
     print " "
     print " "
     print " "
-    vector.append(average_words_length(sc, path))
+    #vector.append(average_words_length(sc, path))
     print " "
     print " "
     print " "
@@ -129,7 +129,9 @@ def get_spark_vector(path):
     print " "
     vector.append(conj_count2(sc, path))
     print vector
-    return np.array(vector)
+    sc.stop()
+    return vector
+
 
 def train_vectors():
     with open('data/authors.json') as data_file:
@@ -161,4 +163,3 @@ def evaluate(path):
     distance_vector = distance_vector / distance_vector.max(axis=0)
     print distance_vector
     return distance_vector
-

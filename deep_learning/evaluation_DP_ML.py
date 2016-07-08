@@ -215,6 +215,8 @@ def pred(entrada, label, seq_len, multiple_lines=False):
 
 
 from threading import Thread
+
+
 def start():
     path = raw_input("Inserire un path di un file da classificare: ")
     Thread(target=evaluation(path))
@@ -232,5 +234,4 @@ def _start_shell(local_ns=None):
 
 
 _start_shell(locals())
-
 

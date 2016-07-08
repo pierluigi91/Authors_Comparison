@@ -56,7 +56,7 @@ def load_data_and_labels():
                 temp_label.append(0)
             i += 1
         # temp_label[d['index']] = 1
-        temp_examples = list(open('./data/small_input/' + d['file_name']).readlines())
+        temp_examples = list(open('data/stemmed_data/' + d['file_name']).readlines())
         temp_examples = [s.strip() for s in temp_examples]
         for _ in temp_examples:
             list_labels.append(temp_label)

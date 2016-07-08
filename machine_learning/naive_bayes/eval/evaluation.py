@@ -37,6 +37,8 @@ def eval(path):
 
     classification = sorted(classification, key=itemgetter(1), reverse=True)
 
+    for p in classification:
+        print p[1]
 
     ALOT = 1.79769313e+308
     sum = 0.0
@@ -55,3 +57,4 @@ def eval(path):
         prova.append(val)
         #100 oppure ALOT
         print p[0],"===========>", val if val < np.inf else 100, "%"
+
