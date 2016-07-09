@@ -130,29 +130,34 @@ def evaluate(path):
 
     array[13] = input_vector
 
-    max = [0, 0, 0, 0]
+    maximum = [0, 0, 0, 0]
 
     for _col in range(0, 3):
         for _row in range(0, 13):
-            if array[_row][_col] > max[_col]:
-                max[_col] = array[_row][_col]
+            if array[_row][_col] > maximum[_col]:
+                maximum[_col] = array[_row][_col]
 
 
     for _col in range(0, 3):
         for _row in range(0, 13):
-            array[_row][_col] = array[_row][_col]/max[_col]
+            array[_row][_col] = array[_row][_col]/maximum[_col]
 
     lista = list()
     for aut in authors:
         ind = aut['index']
-        temp_dist = spatial.distance.cosine(array[13], array[ind])
+        temp_dist = 1.0 - spatial.distance.cosine(array[13], array[ind])
         #print "DISTANZA DA " + str(aut['surname']) + " = " + str(temp_dist)
-        lista.append(temp_dist)
+        lista.append(float(temp_dist))
+
+    res = list()
+    for i in range(0, len(lista)):
+        res.append(lista[i]/max(lista))
+
     #for i in scaled_points:
     #    print i
-    print lista
+    print res
     #print authors[]
-    return lista
+    return res
 
 
 def evaluateOLD(path):
