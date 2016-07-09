@@ -86,47 +86,15 @@ def get_spark_vector(path):
     conf = (SparkConf().setMaster('local[*]').setAppName('spark'))
     sc = SparkContext(conf=conf)
     vector = list()
-    print " "
-    print " "
-    print " "
-    print " "
-    print "----------------------- HAPAX DIX ------------------------"
-    print " "
-    print " "
-    print " "
-    print " "
+
     hapax_dix_result = hapax_dix_legomena(sc, path)
     vector.append(hapax_dix_result[0])
     vector.append(hapax_dix_result[1])
-    print " "
-    print " "
-    print " "
-    print " "
-    print "----------------------- WORDS ------------------------"
-    print " "
-    print " "
-    print " "
-    print " "
+
     #vector.append(average_words_length(sc, path))
-    print " "
-    print " "
-    print " "
-    print " "
-    print "----------------------- SENTENCES ------------------------"
-    print " "
-    print " "
-    print " "
-    print " "
+
     vector.append(average_sentences_length(sc, path))
-    print " "
-    print " "
-    print " "
-    print " "
-    print "----------------------- CONJ ------------------------"
-    print " "
-    print " "
-    print " "
-    print " "
+
     vector.append(conj_count2(sc, path))
     print vector
     sc.stop()
@@ -146,6 +114,49 @@ def train_vectors():
 
 def evaluate(path):
     input_vector = np.array(get_spark_vector(path))
+
+    with open('data/authors.json') as authors_json:
+        authors = json.load(authors_json)
+    with open('authors_vector.json') as vectors_json:
+        vectors = json.load(vectors_json)
+
+    array = np.empty([len(authors)+1, 4])
+
+    for aut_vec in vectors:
+        for aut in authors:
+            ind = aut['index']
+            if aut['file_name'] == aut_vec:
+                array[ind] = np.array(vectors[aut_vec])
+
+    array[13] = input_vector
+
+    max = [0, 0, 0, 0]
+
+    for _col in range(0, 3):
+        for _row in range(0, 13):
+            if array[_row][_col] > max[_col]:
+                max[_col] = array[_row][_col]
+
+
+    for _col in range(0, 3):
+        for _row in range(0, 13):
+            array[_row][_col] = array[_row][_col]/max[_col]
+
+    lista = list()
+    for aut in authors:
+        ind = aut['index']
+        temp_dist = spatial.distance.cosine(array[13], array[ind])
+        #print "DISTANZA DA " + str(aut['surname']) + " = " + str(temp_dist)
+        lista.append(temp_dist)
+    #for i in scaled_points:
+    #    print i
+    print lista
+    #print authors[]
+    return lista
+
+
+def evaluateOLD(path):
+    input_vector = np.array(get_spark_vector(path))
     with open('data/authors.json') as authors_json:
         authors = json.load(authors_json)
     with open('authors_vector.json') as vectors_json:
@@ -153,9 +164,10 @@ def evaluate(path):
     distance = 100
     distance_vector = list()
     for author in vectors:
-        temp_dist = spatial.distance.cosine(input_vector, np.array(vectors[author]))
+        temp_dist = spatial.distance.sqeuclidean(input_vector, np.array(vectors[author]))
         for aut in authors:
             if aut['file_name'] == author:
+
                 print "DISTANZA DA " + str(author) + " = " + str(temp_dist)
                 distance_vector.insert(aut['index'], temp_dist)
 

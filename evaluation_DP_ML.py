@@ -216,9 +216,22 @@ def pred(entrada, label, seq_len, multiple_lines=False):
 from threading import Thread
 def start():
     path = raw_input("Inserire un path di un file da classificare: ")
-    Thread(target=evaluation(path))
-    Thread(target=sp.get_spark_vector(path))
-    Thread(target=nb_ev.eval(path))
+    #Thread(target=evaluation(path))
+    #Thread(target=sp.evaluate(path))
+    #Thread(target=nb_ev.eval(path))
+    sp_res = np.array(sp.evaluate(path))
+    nb_res = np.array(nb_ev.eval(path))
+
+    print 'SPARK: '
+    print sp_res
+    print ''
+    print 'BAYES: '
+    print nb_res
+    print ''
+    print 'SOMMA'
+    print np.add(sp_res*0.5, nb_res*0.5)
+
+
 
 
 def _start_shell(local_ns=None):

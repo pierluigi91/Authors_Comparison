@@ -37,9 +37,6 @@ def eval(path):
 
     classification = sorted(classification, key=itemgetter(1), reverse=True)
 
-    for p in classification:
-        print p[1]
-
     ALOT = 1.79769313e+308
     sum = 0.0
     for p in classification:
@@ -53,8 +50,14 @@ def eval(path):
         #     if d['file_name']==p[0]+".txt":
         #         curr = d['file_name']
         #         lung=len(open("data/input_stemmed/"+curr).readlines())
-        val = ((p[1])/sum)*100
+        # val = ((p[1])/sum)*100
+        # prova.append(val)
+        val = p[1]
         prova.append(val)
         #100 oppure ALOT
         print p[0],"===========>", val if val < np.inf else 100, "%"
+    maximum = max(prova)
+    for l in prova:
+        print l/maximum
 
+    return prova

@@ -7,7 +7,7 @@ from machine_learning.spark import spark_text as sp
 
 def train():
     #Thread(target=dp_tr.training())
-    #Thread(target=nb_tr.train())
+    Thread(target=nb_tr.train())
     #lancio training di spark
     Thread(target=sp.train_vectors())
 
