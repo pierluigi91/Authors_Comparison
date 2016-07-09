@@ -18,17 +18,18 @@ from machine_learning.spark import spark_text as sp
 precision = []
 recall = []
 f1_score = []
-pos=[]
+pos = []
 
 num_authors = 13
 
-js = None
-autori= None
-length_opere=[]
-with open('data/authors.json') as data_file:
+autori = None
+length_opere = []
+with open('./data/authors.json') as data_file:
     js = json.load(data_file)
 for d in js:
-    opera = open('data/stemmed_data/'+d['file_name'], "r").readlines()  #CAMBIARE QUI PER LE OPERE
+    opera = open('./data/stemmed_data/'+d['file_name'], "r").readlines()
+    print "LUNGHEZZA DI " + str(d['file_name']) + " = " + str(len(opera))
+    #CAMBIARE QUI PER LE OPERE
     length_opere.append(len(opera))
 max_length = max(length_opere)
 
@@ -77,6 +78,7 @@ y_train, y_dev = y_shuffled[:-1000], y_shuffled[-1000:]
 print("Vocabulary Size: {:d}".format(len(vocabulary)))
 print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
 
+
 def print_results(array):
     with open('./data/authors.json') as data_file:
         data = json.load(data_file)
@@ -85,11 +87,12 @@ def print_results(array):
     sum = 0.0
 
     for idx, val in enumerate(array):
-        temp_len = len(open('data/stemmed_data/'+d['file_name'], "r").readlines())
+
+        temp_len = len(open('data/stemmed_data/'+data[idx]['file_name'], "r").readlines())
         norm = (val * max_length) / temp_len
         results_list.append([data[idx]['name'], data[idx]['surname'], norm])
-        if val>0.0:
-            sum+=norm
+        if val > 0.0:
+            sum += norm
 
 
     results_list = sorted(results_list, key=itemgetter(2), reverse=True)
@@ -98,38 +101,9 @@ def print_results(array):
     print()
     for result in results_list:
         #print(result[0], '\t', result[1], '\t', result[2])
-        if result[2]>0.0:
+        if result[2] > 0.0:
             print("%-14s %-8s %20.4f" % (result[0], result[1], (result[2]/sum)*100.0)+" %")
     print('=============================================')
-
-# def sentence_fenno(sent, in_file=False):
-#     idx = 1
-#     entrada = x[idx]
-#     sentence = data_helpers.clean_str(sent).split()
-#     seq_len = max(5, len(sentence))
-#     for i in range(seq_len - len(sentence)):
-#         sentence.append('<PAD/>')
-#
-#     entrada = np.array([vocabulary[w] for w in sentence if w in vocabulary])
-#
-#     empty_check = False
-#     for w in sentence:
-#         if w in vocabulary:
-#             if w != padding_word:
-#                 empty_check = True
-#         else:
-#             seq_len -= 1
-#
-#     if not empty_check:
-#         print('Nessuna parola presente nel vocabolario')
-#         return
-#     label = y[idx]
-#     a = pred(entrada, label, seq_len)
-#     if not in_file:
-#         print_results(a)
-#         a = a / a.max(axis=0)
-#     else:
-#         return a
 
 
 def evaluation(path):
@@ -139,8 +113,6 @@ def evaluation(path):
 
     sentences = [data_helpers.clean_str(sent) for sent in sentences]
     sentences = [s.split(" ") for s in sentences]
-
-    sentences = [[clean_text.stemming(word) for _ in sentences] for word in s]
 
     sequence_length = max(len(x) for x in sentences)
     padded_sentences = []
@@ -153,9 +125,9 @@ def evaluation(path):
     label = y[idx]
     x_batch = np.array([[vocabulary[word] if word in vocabulary else vocabulary['<PAD/>'] for word in padded_sentence] for padded_sentence in padded_sentences])
     a = pred(x_batch, label, sequence_length, multiple_lines=True)
+    print "ARRAY DI EVALUATION: " + str(a)
     a = a / a.max(axis=0)
-    #print_results(a)
-    return a
+    print_results(a)
 
 
 # Training
@@ -181,8 +153,7 @@ def pred(entrada, label, seq_len, multiple_lines=False):
 
             # Initialize all variables
             sess.run(tf.initialize_all_variables())
-            saver.restore(sess, "runs/1468072331/checkpoints/model-2800")
-
+            saver.restore(sess, "runs/1468083035/checkpoints/model-00")
 
             def predict_step(x_batch):
                 """
@@ -198,13 +169,10 @@ def pred(entrada, label, seq_len, multiple_lines=False):
 
             if not multiple_lines:
                 entrada = np.reshape(entrada, (-1, len(entrada)))
-                label = np.reshape(label, (-1, len(label)))
                 y = predict_step(entrada)
                 return y[1][0]
             else:
-
                 all_values = np.zeros(num_authors)
-
                 label = np.reshape(label, (-1, len(label)))
                 for line in entrada:
                     line = np.reshape(line, (-1, len(line)))
@@ -214,29 +182,32 @@ def pred(entrada, label, seq_len, multiple_lines=False):
 
 
 from threading import Thread
+
+
 def start():
     path = raw_input("Inserire un path di un file da classificare: ")
     #Thread(target=evaluation(path))
     #Thread(target=sp.evaluate(path))
     #Thread(target=nb_ev.eval(path))
-    sp_res = np.array(sp.evaluate(path))
-    nb_res = np.array(nb_ev.eval(path))
-    clean_text.parsing(path)
-    tf_res = np.array(evaluation(path.replace(".txt", "_modified.txt")))
+    #sp_res = np.array(sp.evaluate(path))
+    #nb_res = np.array(nb_ev.eval(path))
+    #clean_text.parsing(path)
+    #tf_res = np.array(evaluation(path))
 
     print 'SPARK: '
-    print sp_res
+    #print sp_res
     print ''
     print 'BAYES: '
-    print nb_res
+    #print nb_res
     print ''
     print 'TENSORFLOW: '
-    print tf_res
+    np.array(evaluation(path))
     print ''
     print 'RISULTATO:'
-    sp_nb_mean = np.add(sp_res*0.5, nb_res*0.5)
-    result = np.dot(tf_res, sp_nb_mean)
-    print result
+    # sp_nb_mean = np.add(sp_res*0.5, nb_res*0.5)
+    # result = sp_nb_mean * tf_res
+    # print result
+
 
 
 
@@ -250,5 +221,3 @@ def _start_shell(local_ns=None):
 
 
 _start_shell(locals())
-
-
