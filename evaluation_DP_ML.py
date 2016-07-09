@@ -2,7 +2,7 @@
 
 import sys
 sys.path.append('pre_processing')
-import clean_text as clean_text
+import pre_processing.clean_text as clean_text
 import json
 from operator import itemgetter
 
@@ -154,8 +154,8 @@ def evaluation(path):
     x_batch = np.array([[vocabulary[word] if word in vocabulary else vocabulary['<PAD/>'] for word in padded_sentence] for padded_sentence in padded_sentences])
     a = pred(x_batch, label, sequence_length, multiple_lines=True)
     a = a / a.max(axis=0)
-    print_results(a)
-
+    #print_results(a)
+    return a
 
 
 # Training
@@ -181,7 +181,7 @@ def pred(entrada, label, seq_len, multiple_lines=False):
 
             # Initialize all variables
             sess.run(tf.initialize_all_variables())
-            saver.restore(sess, "runs/1467984419/checkpoints/model-100")
+            saver.restore(sess, "runs/1468072331/checkpoints/model-2800")
 
 
             def predict_step(x_batch):
@@ -221,6 +221,8 @@ def start():
     #Thread(target=nb_ev.eval(path))
     sp_res = np.array(sp.evaluate(path))
     nb_res = np.array(nb_ev.eval(path))
+    clean_text.parsing(path)
+    tf_res = np.array(evaluation(path.replace(".txt", "_modified.txt")))
 
     print 'SPARK: '
     print sp_res
@@ -228,9 +230,13 @@ def start():
     print 'BAYES: '
     print nb_res
     print ''
-    print 'SOMMA'
-    print np.add(sp_res*0.5, nb_res*0.5)
-
+    print 'TENSORFLOW: '
+    print tf_res
+    print ''
+    print 'RISULTATO:'
+    sp_nb_mean = np.add(sp_res*0.5, nb_res*0.5)
+    result = np.dot(tf_res, sp_nb_mean)
+    print result
 
 
 

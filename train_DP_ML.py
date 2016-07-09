@@ -11,6 +11,4 @@ def train():
     #lancio training di spark
     Thread(target=sp.train_vectors())
 
-
-
 train()

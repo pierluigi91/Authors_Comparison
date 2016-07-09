@@ -2,11 +2,12 @@ from __future__ import division
 import operator
 from functools import reduce
 
-from naiveBayesClassifier.ExceptionNotSeen import NotSeen
+from ExceptionNotSeen import NotSeen
 
 
 class Classifier(object):
     """docstring for Classifier"""
+
     def __init__(self, trainedData, tokenizer):
         super(Classifier, self).__init__()
         self.data = trainedData
@@ -18,10 +19,7 @@ class Classifier(object):
 
         documentCount = self.data.getDocCount()
         classes = self.data.getClasses()
-
-        # only unique tokens
-        tokens = list(set(self.tokenizer.tokenize(text)))
-
+        tokens = self.tokenizer.tokenize(text)
         probsOfClasses = {}
 
         for className in classes:
@@ -35,22 +33,20 @@ class Classifier(object):
             # in the text of this class
             # P(Token_1|Class_i) * P(Token_2|Class_i) * ... * P(Token_n|Class_i)
             try:
-                tokenSetProb = reduce(lambda a,b: a*b, (i for i in tokensProbs if i) )
+                tokenSetProb = reduce(lambda a, b: (a * b) / (a + b), (i for i in tokensProbs if i))
             except:
                 tokenSetProb = 0
-
-            probsOfClasses[className] = tokenSetProb * self.getPrior(className)
-
+            probsOfClasses[className] = tokenSetProb / self.getPrior(className)
+            print probsOfClasses[className], tokenSetProb, self.getPrior(className), className
         return sorted(probsOfClasses.items(),
-            key=operator.itemgetter(1),
-            reverse=True)
-
+                      key=operator.itemgetter(1),
+                      reverse=True)
 
     def getPrior(self, className):
-        return self.data.getClassDocCount(className) /  self.data.getDocCount()
+        return self.data.getClassDocCount(className) / self.data.getDocCount()
 
     def getTokenProb(self, token, className):
-        #p(token|Class_i)
+        # p(token|Class_i)
         classDocumentCount = self.data.getClassDocCount(className)
 
         # if the token is not seen in the training set, so not indexed,
@@ -64,5 +60,5 @@ class Classifier(object):
         if tokenFrequency is None:
             return self.defaultProb
 
-        probablity =  tokenFrequency / classDocumentCount
+        probablity = tokenFrequency / classDocumentCount
         return probablity

@@ -100,35 +100,28 @@ def stemming(linea):
     return result.strip()
 
 
-def parsing(rootdir):
-    for subdir, dirs, files in os.walk(rootdir):
-        for file in files:
-            if file.__contains__("cleaned"):
-                input = open(subdir+"/"+file, 'r')
-                text = input.read()
-                text = ' '.join(unicode(text, 'utf-8').splitlines())
-                print file
-                # out2 = open('ul2.txt', 'w')
-                # out2.write(text)
-                output = split_into_sentences(text.encode('utf-8'))
-                # output2 = [[stemmer.stem(word) for word in sentence.split(' ')] for sentence in output]
-                output2 = [[word for word in sentence.split(' ')] for sentence in output]
-                print(len(output2))
-                out = open(subdir+"/"+file.replace(".txt", "")+"_modified.txt", 'w')
-                output3 = []
-                for i in output2:
-                    linea = ''
-                    for j in i:
-                        linea += j + ' '
-                    # linea += '\n'
-                    output3.append(linea)
-                for i in output3:
-                    if len(i) >= 12:
-                        temp = re.sub("[^a-zA-Z0-9\s]", " ", i)
-                        temp = stemming(temp)
-                        # map_red(temp)
-                        temp = stopping(temp)
-                        out.write(smart_truncate(str(temp), length=256, suffix=' ')+"\n")
+def parsing(path):
+    input = open(path, 'r')
+    text = input.read()
+    text = ' '.join(unicode(text, 'utf-8').splitlines())
+    output = split_into_sentences(text.encode('utf-8'))
+    output2 = [[word for word in sentence.split(' ')] for sentence in output]
+    print(len(output2))
+    out = open(str(path).replace(".txt", "_modified.txt"), 'w')
+    output3 = []
+    for i in output2:
+        linea = ''
+        for j in i:
+            linea += j + ' '
+        # linea += '\n'
+        output3.append(linea)
+    for i in output3:
+        if len(i) >= 12:
+            temp = re.sub("[^a-zA-Z0-9\s]", " ", i)
+            temp = stemming(temp)
+            # map_red(temp)
+            temp = stopping(temp)
+            out.write(smart_truncate(str(temp), length=256, suffix=' ')+"\n")
 
 
 def remove_empty_lines(text):
