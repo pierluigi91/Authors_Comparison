@@ -112,6 +112,7 @@ def evaluation(path):
     sentences = [s.strip() for s in sentences]
 
     sentences = [data_helpers.clean_str(sent) for sent in sentences]
+    sentences = [clean_text.stemming(sent) for sent in sentences]
     sentences = [s.split(" ") for s in sentences]
 
     sequence_length = max(len(x) for x in sentences)
