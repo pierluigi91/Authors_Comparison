@@ -5,7 +5,7 @@ sys.path.append('pre_processing')
 import pre_processing.clean_text as clean_text
 import json
 from operator import itemgetter
-
+import re
 import numpy as np
 import tensorflow as tf
 sys.path.append('deep_learning')
@@ -14,7 +14,7 @@ from deep_learning.text_cnn import TextCNN
 sys.path.append('')
 from machine_learning.naive_bayes.eval import evaluation as nb_ev
 from machine_learning.spark import spark_text as sp
-
+import math
 precision = []
 recall = []
 f1_score = []
@@ -29,7 +29,6 @@ with open('./data/authors.json') as data_file:
 for d in js:
     opera = open('./data/stemmed_data/'+d['file_name'], "r").readlines()
     print "LUNGHEZZA DI " + str(d['file_name']) + " = " + str(len(opera))
-    #CAMBIARE QUI PER LE OPERE
     length_opere.append(len(opera))
 max_length = max(length_opere)
 
@@ -79,56 +78,72 @@ print("Vocabulary Size: {:d}".format(len(vocabulary)))
 print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
 
 
-def print_results(array):
+def print_results(array, autore):
     with open('./data/authors.json') as data_file:
         data = json.load(data_file)
     array = array.tolist()
     results_list = []
     sum = 0.0
 
+    result_array = []
     for idx, val in enumerate(array):
 
-        temp_len = len(open('data/stemmed_data/'+data[idx]['file_name'], "r").readlines())
-        norm = (val * max_length) / temp_len
+        norm = val
         results_list.append([data[idx]['name'], data[idx]['surname'], norm])
-        if val > 0.0:
+        result_array.append(norm)
+        if val >= 0.0:
             sum += norm
 
-
     results_list = sorted(results_list, key=itemgetter(2), reverse=True)
-    print('=============================================')
-    print('Nome\t|\tCognome\t\t|\tScore')
-    print()
+    f1 = open('./risultati3', 'a')
+    f1.write('RISULTATO PER ' + str(autore) + ": " + "\n")
+    f1.write('============================================='+ "\n")
+    f1.write('Nome\t|\tCognome\t\t|\tScore'+ "\n")
     for result in results_list:
         #print(result[0], '\t', result[1], '\t', result[2])
         if result[2] > 0.0:
-            print("%-14s %-8s %20.4f" % (result[0], result[1], (result[2]/sum)*100.0)+" %")
-    print('=============================================')
+            f1.write("%-14s %-8s %20.4f" % (result[0], result[1], (result[2]/sum)*100.0)+" %"+ "\n")
+        f1.write('============================================='+ "\n")
 
 
 def evaluation(path):
     idx = 1
     sentences = list(open(path, "r").readlines())
     sentences = [s.strip() for s in sentences]
-
     sentences = [data_helpers.clean_str(sent) for sent in sentences]
     sentences = [clean_text.stemming(sent) for sent in sentences]
-    sentences = [s.split(" ") for s in sentences]
+    sentences = [re.sub('[^0-9a-zA-Z\s]+', '', s) for s in sentences]
 
-    sequence_length = max(len(x) for x in sentences)
+    def lunghezza_frase(s):
+        lung_temp = 0
+        for w in s.split():
+            lung_temp += 1
+        return lung_temp
+
+    sequence_length = 0
+    for s in sentences:
+        lung_frase = lunghezza_frase(s)
+        if lung_frase > sequence_length:
+            sequence_length = lung_frase
+
     padded_sentences = []
     for i in range(len(sentences)):
         sentence = sentences[i]
-        num_padding = sequence_length - len(sentence)
-        new_sentence = sentence + [padding_word] * num_padding
+        lung = lunghezza_frase(sentence)
+        num_padding = sequence_length - lung
+        new_sentence = []
+        for word in sentence.split():
+            new_sentence.append(str(word))
+        for j in range(0, num_padding):
+            new_sentence.append(padding_word)
         padded_sentences.append(new_sentence)
 
     label = y[idx]
     x_batch = np.array([[vocabulary[word] if word in vocabulary else vocabulary['<PAD/>'] for word in padded_sentence] for padded_sentence in padded_sentences])
     a = pred(x_batch, label, sequence_length, multiple_lines=True)
     print "ARRAY DI EVALUATION: " + str(a)
-    a = a / a.max(axis=0)
-    print_results(a)
+    a = a + abs(a.min(axis=0))
+    return a
 
 
 # Training
@@ -154,7 +169,7 @@ def pred(entrada, label, seq_len, multiple_lines=False):
 
             # Initialize all variables
             sess.run(tf.initialize_all_variables())
-            saver.restore(sess, "runs/1468083035/checkpoints/model-00")
+            saver.restore(sess, "runs/prova/checkpoints/model-82100")
 
             def predict_step(x_batch):
                 """
@@ -185,30 +200,55 @@ def pred(entrada, label, seq_len, multiple_lines=False):
 from threading import Thread
 
 
-def start():
-    path = raw_input("Inserire un path di un file da classificare: ")
+def start2():
+    start("/Users/Max/PycharmProjects/Authors_Comparison/data/sentence_to_line_data/Howard_Phillips_Lovecraft/The_Case_of_Charles_Dexter_W.txt", "LOVECRAFT")
+    start("/Users/Max/PycharmProjects/Authors_Comparison/data/sentence_to_line_data/Robert_Louis_Stevenson/The_Body-Snatcher.txt", "STEVENSON")
+    start("/Users/Max/PycharmProjects/Authors_Comparison/data/sentence_to_line_data/Charles_Dickens/The_Battle_of_Life.txt", "DICKENS")
+    start("/Users/Max/PycharmProjects/Authors_Comparison/data/sentence_to_line_data/James_Joyce/Chamber_Music.txt", "JOYCE")
+    start("/Users/Max/PycharmProjects/Authors_Comparison/data/sentence_to_line_data/Mark_Twain/Alonzo_Fitz.txt", "MARK TWAIN")
+    start("/Users/Max/PycharmProjects/Authors_Comparison/data/sentence_to_line_data/Jonathan_Swift/A_Modest_Proposal.txt", "SWIFT")
+    start("/Users/Max/PycharmProjects/Authors_Comparison/data/sentence_to_line_data/Mark_Twain/mark_twain.txt", "MARK TWAIN")
+    start("/Users/Max/PycharmProjects/Authors_Comparison/data/sentence_to_line_data/Charles_Dickens/acc.txt", "DICKENS")
+    start("/Users/Max/PycharmProjects/Authors_Comparison/data/sentence_to_line_data/Charles_Dickens/oliver_twist.txt", "DICKENS")
+    start("/Users/Max/PycharmProjects/Authors_Comparison/data/sentence_to_line_data/Jane_Austen/jane_austen.txt", "AUSTEN")
+
+
+def start(path, autore):
+    #path = raw_input("Inserire un path di un file da classificare: ")
     #Thread(target=evaluation(path))
     #Thread(target=sp.evaluate(path))
     #Thread(target=nb_ev.eval(path))
-    #sp_res = np.array(sp.evaluate(path))
-    #nb_res = np.array(nb_ev.eval(path))
-    #clean_text.parsing(path)
-    #tf_res = np.array(evaluation(path))
-
+    sp_res = np.array(sp.evaluate(path))
+    nb_res = np.array(nb_ev.eval(path))
+    tf_res = np.array(evaluation(path))
+    tf_res2 = []
+    for el in tf_res:
+        tf_res2.append((el - min(tf_res))/(max(tf_res - min(tf_res))))
+    tf_res2 = np.array(tf_res2)
+    tf_res3 = []
+    with open('./data/authors.json') as data_file:
+        data = json.load(data_file)
+    for idx, val in enumerate(tf_res2):
+        temp_len = len(open('data/stemmed_data/'+data[idx]['file_name'], "r").readlines())
+        norm = (val * math.log(max_length)) / math.log(temp_len)
+        tf_res3.append(norm)
+    tf_res3 = np.array(tf_res3)
     print 'SPARK: '
-    #print sp_res
+    print sp_res
     print ''
     print 'BAYES: '
-    #print nb_res
+    print nb_res
     print ''
     print 'TENSORFLOW: '
-    np.array(evaluation(path))
+    print tf_res
     print ''
-    print 'RISULTATO:'
-    # sp_nb_mean = np.add(sp_res*0.5, nb_res*0.5)
-    # result = sp_nb_mean * tf_res
-    # print result
-
+    print 'TENSORFLOW NORMALIZZATO: '
+    print tf_res3
+    print ''
+    print 'RISULTATO PER ' + str(autore) + ": "
+    sp_nb_mean = np.add(sp_res*0.5, nb_res*0.5)
+    result = sp_nb_mean * tf_res3
+    print_results(result, autore)
 
 
 

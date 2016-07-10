@@ -27,8 +27,6 @@ def clean_top_bottom(path):
     start = False
     text = open(path, "r")
     libro = text.readlines()
-    # os.path.basename(path)
-    # cleaned_text = open(subdir+"/cleaned_text_"+os.path.basename(path).replace(".txt","")+".txt","w")
     cleaned_text = ''
     for i in range(1, len(libro)):
         if libro[i-1].__contains__("*** START OF") \
@@ -41,8 +39,6 @@ def clean_top_bottom(path):
             start = False
         if start:
             cleaned_text += libro[i]
-            # cleaned_text.write(libro[i])
-    #cleaned_text.close()
     text.close()
     return cleaned_text
 
@@ -95,7 +91,7 @@ def stopping(linea):
 def stemming(linea):
     stemmer = SnowballStemmer("english")
     result=""
-    for word in linea.split(' '):
+    for word in linea.split():
         result += stemmer.stem(word) + " "
     return result.strip()
 
@@ -157,7 +153,6 @@ def process_dataset(rootdir):
                 os.makedirs(sentence2line_outputdir)
             if not os.path.exists(sentence2line_outputdir + author):
                 os.makedirs(sentence2line_outputdir + author)
-            # sentence2line_text = [[word for word in sentence.split(' ')] for sentence in sentence2line_list]
             output_splitline_file = open(sentence2line_outputdir + author + '/' + str(_file), 'w')
             output_splitline_text = ''
             for line in sentence2line_list:
@@ -173,11 +168,12 @@ def process_dataset(rootdir):
             output_stemmed_file = open(stemmed_outputdir + author + '/' + str(_file), 'w')
             output_stemmed_text = ''
             for line in output_splitline_text.splitlines():
-                temp = stopping(line)
-                temp = stemming(temp)
-                temp = re.sub('[^a-zA-Z\s]', '', temp)
-                temp = smart_truncate(temp, length=256, suffix='') + '\n'
-                output_stemmed_text += temp
+                if len(line) >= 30:
+                    temp = stopping(line)
+                    temp = stemming(temp)
+                    temp = re.sub('[^a-zA-Z\s]', '', temp)
+                    temp = smart_truncate(temp, length=256, suffix='') + '\n'
+                    output_stemmed_text += temp
             output_stemmed_text = remove_empty_lines(output_stemmed_text)
             output_stemmed_file.write(output_stemmed_text)
             output_stemmed_file.close()
@@ -186,22 +182,3 @@ def process_dataset(rootdir):
 process_dataset('../data/dataset')
 merge_files_by_author('../data/sentence_to_line_data')
 merge_files_by_author('../data/stemmed_data')
-
-
-
-
-
-
-# for i in os.listdir("/home/pierluigi/Scrivania/testi"):
-#     if i.endswith(".txt"):
-#         clean_top_bottom("/home/pierluigi/Scrivania/testi/"+i)
-# parsing()
-
-
-
-# for subdir, dirs, files in os.walk(rootdir):
-#     for file in files:
-#         clean_top_bottom(os.path.abspath(subdir)+"/"+file, subdir)
-#         print os.path.join(subdir, file)
-# parsing()
-
