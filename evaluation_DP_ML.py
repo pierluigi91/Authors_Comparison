@@ -78,7 +78,7 @@ print("Vocabulary Size: {:d}".format(len(vocabulary)))
 print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
 
 
-def print_results(array, autore):
+def print_results(array):
     with open('./data/authors.json') as data_file:
         data = json.load(data_file)
     array = array.tolist()
@@ -95,15 +95,13 @@ def print_results(array, autore):
             sum += norm
 
     results_list = sorted(results_list, key=itemgetter(2), reverse=True)
-    f1 = open('./risultati3', 'a')
-    f1.write('RISULTATO PER ' + str(autore) + ": " + "\n")
-    f1.write('============================================='+ "\n")
-    f1.write('Nome\t|\tCognome\t\t|\tScore'+ "\n")
+    print('RISULTATO')
+    print('=============================================')
+    print('Nome\t|\tCognome\t\t|\tScore')
     for result in results_list:
-        #print(result[0], '\t', result[1], '\t', result[2])
         if result[2] > 0.0:
-            f1.write("%-14s %-8s %20.4f" % (result[0], result[1], (result[2]/sum)*100.0)+" %"+ "\n")
-        f1.write('============================================='+ "\n")
+            print("%-14s %-8s %20.4f" % (result[0], result[1], (result[2]/sum)*100.0)+" %")
+            print('=============================================')
 
 
 def evaluation(path):
@@ -199,7 +197,7 @@ def pred(entrada, label, seq_len, multiple_lines=False):
 
 from threading import Thread
 
-
+# Metodo usato per debuggare, gli dai in input x libri da valutare. Va modificato ad hoc lo start pero!
 def start2():
     start("/Users/Max/PycharmProjects/Authors_Comparison/data/sentence_to_line_data/Howard_Phillips_Lovecraft/The_Case_of_Charles_Dexter_W.txt", "LOVECRAFT")
     start("/Users/Max/PycharmProjects/Authors_Comparison/data/sentence_to_line_data/Robert_Louis_Stevenson/The_Body-Snatcher.txt", "STEVENSON")
@@ -213,8 +211,8 @@ def start2():
     start("/Users/Max/PycharmProjects/Authors_Comparison/data/sentence_to_line_data/Jane_Austen/jane_austen.txt", "AUSTEN")
 
 
-def start(path, autore):
-    #path = raw_input("Inserire un path di un file da classificare: ")
+def start():
+    path = raw_input("Inserire un path di un file da classificare: ")
     #Thread(target=evaluation(path))
     #Thread(target=sp.evaluate(path))
     #Thread(target=nb_ev.eval(path))
@@ -245,10 +243,10 @@ def start(path, autore):
     print 'TENSORFLOW NORMALIZZATO: '
     print tf_res3
     print ''
-    print 'RISULTATO PER ' + str(autore) + ": "
+    print 'RISULTATO : '
     sp_nb_mean = np.add(sp_res*0.5, nb_res*0.5)
     result = sp_nb_mean * tf_res3
-    print_results(result, autore)
+    print_results(result)
 
 
 
