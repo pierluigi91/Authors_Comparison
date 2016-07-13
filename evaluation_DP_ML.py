@@ -15,10 +15,7 @@ sys.path.append('')
 from machine_learning.naive_bayes.eval import evaluation as nb_ev
 from machine_learning.spark import spark_text as sp
 import math
-precision = []
-recall = []
-f1_score = []
-pos = []
+
 
 num_authors = 13
 
@@ -167,7 +164,7 @@ def pred(entrada, label, seq_len, multiple_lines=False):
 
             # Initialize all variables
             sess.run(tf.initialize_all_variables())
-            saver.restore(sess, "runs/prova/checkpoints/model-82100")
+            saver.restore(sess, "runs/1468112105/checkpoints/model-82100")
 
             def predict_step(x_batch):
                 """

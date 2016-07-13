@@ -5,15 +5,13 @@ You want to train a system with this pre-categorized/pre-classified
 texts. So, you have better call this data your training set.
 """
 import pickle
-import sys
-from naiveBayesClassifier import tokenizer
-from naiveBayesClassifier.trainer import Trainer
+from machine_learning.naive_bayes import tokenizer
+from machine_learning.naive_bayes import trainer as Trainer
 import json
 
 
 def train():
-    authorsTrainer = Trainer(tokenizer)
-
+    authorsTrainer = Trainer.Trainer(tokenizer)
 
     autori= []
     length_opere=[]
@@ -26,8 +24,6 @@ def train():
         for p in opera:
             r += p
         autori.append(r)
-    #max_length = float(max(length_opere))
-
 
     authorsSet =[
         {'text': autori[0], 'author': 'arthur_conan_doyle'},
@@ -51,23 +47,11 @@ def train():
         lista_num_token.append(authorsTrainer.min_num_token(author['text']))
     min_num_token = min(lista_num_token)
 
-
-
     for author in authorsSet:
         authorsTrainer.train(author['text'], author['author'], min_num_token)
 
-
-
-
-
-
-    #SERVE SOLO A NAIVE BAYES
     output = open('train.pkl', 'wb')
     pickle.dump(authorsTrainer.data, output)
     output.close()
 
-    #SERVE ANCHEA DEEP LEARNING
-    output2 = open('js.pkl', 'wb')
-    pickle.dump(js, output2)
-    output2.close()
 
